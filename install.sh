@@ -21,6 +21,7 @@ cd xdp-tools-1.5.5
 make -j && sudo make install
 cd ..
 
+pwd
 cd xdp-tools/1.5.5/lib/libbpf/src
 make -j && sudo make install
 sudo ldconfig
