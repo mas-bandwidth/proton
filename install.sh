@@ -58,13 +58,15 @@ sudo cp /sys/kernel/btf/vmlinux /usr/lib/modules/`uname -r`/build/
 
 # install proton module
 
+pwd
+
 make
 sudo mkdir -p /lib/modules/`uname -r`/kernel/net/proton
 sudo mv proton.ko /lib/modules/`uname -r`/kernel/net/proton
 
 # setup proton module to load on reboot
 
-cp /etc/modules .
+cp /etc/modules ./modules.txt
 echo "proton" >> modules.txt
 sudo mv modules.txt /etc/modules
 sudo depmod
