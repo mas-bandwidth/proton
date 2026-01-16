@@ -23,6 +23,7 @@
 #include <linux/module.h>
 #include <linux/bpf.h>
 #include <linux/btf.h>
+#include <linux/fpu.h>
 #include <crypto/hash.h>
 #include <crypto/kpp.h>
 #include "hydrogen.h"
