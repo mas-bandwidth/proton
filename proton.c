@@ -45,17 +45,13 @@ static __u8 sign_context[hydro_sign_CONTEXTBYTES];
 
 __bpf_kfunc int proton_sign_create( void * data, int data__sz, void * signature, int signature__sz, struct proton_sign_create_args * args )
 {
-    kernel_fpu_begin();
     int result = hydro_sign_create( signature, data, data__sz, sign_context, args->private_key );
-    kernel_fpu_end();
     return result;
 }
 
 __bpf_kfunc int proton_sign_verify( void * data, int data__sz, void * signature, int signature__sz, struct proton_sign_verify_args * args )
 {
-    kernel_fpu_begin();
     int result = hydro_sign_verify( signature, data, data__sz, sign_context, args->public_key );
-    kernel_fpu_end();
     return result;
 }
 
@@ -65,20 +61,16 @@ static __u8 secretbox_context[hydro_secretbox_CONTEXTBYTES];
 
 int proton_secretbox_encrypt( void * data, int data__sz, __u64 message_id, void * key, int key__sz )
 {
-    kernel_fpu_begin();
     void * message = data + PROTON_SECRETBOX_CRYPTO_HEADER_BYTES;
     int message_bytes = data__sz - PROTON_SECRETBOX_CRYPTO_HEADER_BYTES;
     int result = hydro_secretbox_encrypt( data, message, message_bytes, message_id, secretbox_context, key );
-    kernel_fpu_end();
     return result;
 }
 
 int proton_secretbox_decrypt( void * data, int data__sz, __u64 message_id, void * key, int key__sz )
 {
-    kernel_fpu_begin();
     void * message = data + PROTON_SECRETBOX_CRYPTO_HEADER_BYTES;
     int result = hydro_secretbox_encrypt( message, data, data__sz, message_id, secretbox_context, key );
-    kernel_fpu_end();
     return result;
 }
 
