@@ -44,8 +44,4 @@ extern int proton_secretbox_encrypt( void * data, int data__sz, __u64 message_id
 extern int proton_secretbox_decrypt( void * data, int data__sz, __u64 message_id, void * key, int key__sz );
 ```
 
-These functions are compatible with crypto done in userspace using the regular libhydrogen, but please take special care with secretbox because I had to change the function signature.
-
-The reason is that there is a limit of 5 arguments per-kfunc *and* you need to pass in array lengths via *__sz for the BPF verifier.
-
-Because of this, the secretbox functions encrypt and decrypt in-place *and* you need to pass in a pointer to the data with the crypto header included at the front for both encrypt and decrypt.
+These functions are compatible with crypto done in userspace using the regular libhydrogen, but please take special care with secretbox because I had to change the function signature to match the rules for kfuncs (5 arguments max per-function *and* you must pass in array lengths via __sz for the BPF verifier).
