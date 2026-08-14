@@ -55,30 +55,28 @@ This repo carries its **own copy** of `hydrogen.c` / `hydrogen.h`, and it is
 *almost* the same file as the one in
 [mas-bandwidth/hydrogen](https://github.com/mas-bandwidth/hydrogen).
 
-As of 2026-08-13 the entire difference is **three lines**: a forward
-declaration of `warnings_fuck_off` to satisfy `-Wmissing-prototypes`, which
-kernel builds turn on and userspace builds do not.
-
-```c
-void warnings_fuck_off(void);       // -Wmissing-prototypes
-
-void warnings_fuck_off(void)
-```
+As of 2026-08-15 the delta is **zero — both files are byte-identical to
+hydrogen's**, so parity is a checksum, not a diff review. How it got to zero:
+the `warnings_fuck_off` prototype moved into hydrogen on 2026-08-14 (a
+flattening artifact, harmless in userspace), and the `__KERNEL__` header
+block this copy carried locally became upstream's own on 2026-08-14 —
+jedisct1/libhydrogen `617036a`, fixing #165, which was filed from this
+estate for exactly this divergence. Upstream's form has no typedefs;
+`linux/types.h` supplies `uint8_t` through `uint64_t` itself.
 
 Two consequences worth acting on:
 
 1. **Upstream fixes have to be carried here too.** The hydrogen repo tracks
    jedisct1/libhydrogen by hand; this copy does not automatically follow. When
-   a fix lands there, copy the file across and re-apply the three-line
-   prototype delta. Pay particular attention to upstream changes in the
-   `__KERNEL__` / `impl/random/linux_kernel.h` path — that is the branch this
-   module actually compiles, and it is the one place where an upstream RNG
-   change is directly load-bearing here rather than academic.
-2. **The delta could be zero.** A forward declaration is harmless in a
-   userspace build. If `mas-bandwidth/hydrogen` carried it too, the two files
-   could be byte-identical, and a CI parity check could *enforce* that instead
-   of relying on someone remembering. A sentence claiming two files match
-   stays true only until someone edits one of them.
+   a fix lands there, copy both files across — the delta is zero now, so a
+   straight copy is the whole re-vendor. Pay particular attention to upstream
+   changes in the `__KERNEL__` / `impl/random/linux_kernel.h` path — that is
+   the branch this module actually compiles, and it is the one place where an
+   upstream RNG change is directly load-bearing here rather than academic.
+2. **The delta being zero makes it enforceable.** A CI parity check could
+   compare checksums against mas-bandwidth/hydrogen instead of relying on
+   someone remembering. A sentence claiming two files match stays true only
+   until someone edits one of them.
 
 ## Equivalence is the property that matters
 
