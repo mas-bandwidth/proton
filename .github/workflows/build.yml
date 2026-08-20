@@ -1,0 +1,38 @@
+name: build
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  module:
+    name: kernel module (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-22.04, ubuntu-24.04]
+    steps:
+      - uses: actions/checkout@v5
+
+      # The runner's own kernel headers are not published, so the module is
+      # compiled against the distribution's generic header set instead. That
+      # builds it; it deliberately does not load it. What this job proves is
+      # that proton.c and the vendored hydrogen.c still compile as kernel
+      # code, which is the check that was missing when a re-vendor landed.
+      - name: Install kernel headers and build tools
+        run: |
+          sudo DEBIAN_FRONTEND=noninteractive apt-get update -y
+          sudo DEBIAN_FRONTEND=noninteractive apt-get install -y \
+            build-essential linux-headers-generic libelf-dev dwarves bc
+
+      - name: Build
+        run: |
+          KDIR=$(ls -d /lib/modules/*/build | head -1)
+          echo "building against $KDIR"
+          make build KDIR="$KDIR"
+
+      - name: Show module
+        run: modinfo ./proton.ko
