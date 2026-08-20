@@ -13,7 +13,13 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-22.04, ubuntu-24.04]
+        # 24.04 only, and that is the repo's stated support floor. ubuntu-22.04
+        # ships kernel 5.15, which predates __bpf_kfunc and BTF_ID_FLAGS kfunc
+        # registration, so proton.c cannot compile there at all -- measured,
+        # not assumed: the first error is `expected ';' before 'int'` on the
+        # first __bpf_kfunc declaration. The kfunc contract is a 6.x feature
+        # and it is the whole design of this module.
+        os: [ubuntu-24.04]
     steps:
       - uses: actions/checkout@v5
 
