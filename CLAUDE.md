@@ -73,10 +73,14 @@ Two consequences worth acting on:
    changes in the `__KERNEL__` / `impl/random/linux_kernel.h` path — that is
    the branch this module actually compiles, and it is the one place where an
    upstream RNG change is directly load-bearing here rather than academic.
-2. **The delta being zero makes it enforceable.** A CI parity check could
-   compare checksums against mas-bandwidth/hydrogen instead of relying on
-   someone remembering. A sentence claiming two files match stays true only
-   until someone edits one of them.
+2. **The delta being zero is now enforced rather than claimed.**
+   `.github/workflows/hydrogen-parity.yml` diffs both vendored files against
+   `mas-bandwidth/hydrogen` on every push and pull request, and once a day on a
+   schedule — daily because the change that breaks parity happens in the *other*
+   repo, where no push here can see it. A red run does not mean this repo is
+   broken; it means hydrogen has moved and the carry is owed. This is what the
+   previous version of this item asked for, in its own words: a sentence
+   claiming two files match stays true only until someone edits one of them.
 
 ## Equivalence is the property that matters
 
@@ -93,5 +97,14 @@ re-vendor, which is exactly when you want them.
 ## Build and install
 
 `./install.sh` builds the module and sets it to load on boot; Ubuntu 24.04 LTS
-or newer. Kernel modules are tied to kernel headers, so a kernel upgrade means
+or newer. `make build` compiles without installing anything, which is what CI
+calls and what to reach for when the question is only whether it still builds.
+
+**24.04 is a floor, not a preference.** Ubuntu 22.04 ships kernel 5.15, which
+has no `__bpf_kfunc` and no `BTF_ID_FLAGS` kfunc registration, so `proton.c`
+does not compile there at all. The kfunc contract described above *is* the
+design of this module, and it is a 6.x kernel feature. (`.semaphore/semaphore.yml`
+still describes a 22.04 build job; it cannot have been passing.)
+
+Kernel modules are tied to kernel headers, so a kernel upgrade means
 a rebuild — worth knowing before a server reboot surprises you.

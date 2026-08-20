@@ -1,0 +1,49 @@
+name: hydrogen parity
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  schedule:
+    # Daily, because the failure this catches is silent staleness in a crypto
+    # vendor: the file keeps compiling while fixes pile up on the other side.
+    # A push-triggered check cannot see that, since the change is elsewhere.
+    - cron: "17 21 * * *"
+  workflow_dispatch:
+
+jobs:
+  parity:
+    name: hydrogen.c / hydrogen.h byte parity
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          path: proton
+
+      - uses: actions/checkout@v5
+        with:
+          repository: mas-bandwidth/hydrogen
+          path: hydrogen
+
+      # CLAUDE.md asks for exactly this: "a CI parity check could enforce that
+      # instead of relying on someone remembering. A sentence claiming two
+      # files match stays true only until someone edits one of them."
+      #
+      # RED here does not mean this repo is broken. It means hydrogen has moved
+      # and the change has not been carried across. The fix is to re-vendor
+      # both files from mas-bandwidth/hydrogen, verbatim, and let the build job
+      # confirm the result still compiles in-kernel.
+      - name: Diff the vendored files against mas-bandwidth/hydrogen
+        run: |
+          status=0
+          for f in hydrogen.c hydrogen.h; do
+            if diff -u "hydrogen/$f" "proton/$f"; then
+              echo "ok: $f is byte-identical"
+            else
+              echo "::error file=$f::$f differs from mas-bandwidth/hydrogen"
+              status=1
+            fi
+          done
+          echo
+          echo "hydrogen at $(git -C hydrogen rev-parse --short HEAD) ($(git -C hydrogen log -1 --format=%ad --date=short))"
+          exit $status
