@@ -69,8 +69,12 @@ int proton_secretbox_encrypt( void * data, int data__sz, __u64 message_id, void 
 
 int proton_secretbox_decrypt( void * data, int data__sz, __u64 message_id, void * key, int key__sz )
 {
-    void * message = data + PROTON_SECRETBOX_CRYPTO_HEADER_BYTES;
-    int result = hydro_secretbox_encrypt( message, data, data__sz, message_id, secretbox_context, key );
+    // The plaintext lands at the START of data, data__sz - PROTON_SECRETBOX_CRYPTO_HEADER_BYTES
+    // bytes long. hydro_secretbox_decrypt supports this backward overlap because its reads stay
+    // one header ahead of its writes. Writing the plaintext at data + header instead (exact
+    // overlap with the ciphertext) fails the MAC by construction: hydrogen's decrypt re-absorbs
+    // each ciphertext block after the corresponding output block is written.
+    int result = hydro_secretbox_decrypt( data, data, data__sz, message_id, secretbox_context, key );
     return result;
 }
 
