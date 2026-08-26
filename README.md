@@ -4,6 +4,8 @@
 
 [![CI](https://github.com/mas-bandwidth/proton/actions/workflows/build.yml/badge.svg)](https://github.com/mas-bandwidth/proton/actions/workflows/build.yml)
 
+If this work helps you, please support it: **[Become a supporter](https://www.patreon.com/MasBandwidth/membership)**
+
 Proton is a linux kernel module based on [libhydrogen](https://github.com/jedisct1/libhydrogen) that provides crypto functions callable from XDP programs.
 
 # Why?
