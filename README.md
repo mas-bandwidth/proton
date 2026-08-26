@@ -2,6 +2,8 @@
 
 # proton
 
+[![CI](https://github.com/mas-bandwidth/proton/actions/workflows/build.yml/badge.svg)](https://github.com/mas-bandwidth/proton/actions/workflows/build.yml)
+
 Proton is a linux kernel module based on [libhydrogen](https://github.com/jedisct1/libhydrogen) that provides crypto functions callable from XDP programs.
 
 # Why?
