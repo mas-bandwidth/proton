@@ -522,7 +522,7 @@ static TLS struct {
 
 #elif (defined(ESP32) || defined(ESP8266)) && !defined(__unix__)
 
-    // Important: RF *must* be activated on ESP board
+    // Important: RF *must* be activated on the ESP board
     // https://techtutorialsx.com/2017/12/22/esp32-arduino-random-number-generation/
     #ifdef ESP32
     #    include <esp_system.h>
@@ -804,8 +804,9 @@ static TLS struct {
             return -1;
         }
         // mbedtls_entropy_func can't provide more than MBEDTLS_ENTROPY_BLOCK_SIZE in one go.
-        // This constant depends of mbedTLS configuration (whether the PRNG is backed by SHA256/SHA512
-        // at this time) Therefore, if necessary, we get entropy multiple times.
+        // This constant depends on the mbedTLS configuration (whether the PRNG is backed by SHA256/SHA512
+        // at this time).
+        // Therefore, if necessary, we get entropy multiple times.
 
         do {
             const uint8_t dataLeftToConsume = gimli_BLOCKBYTES - pos;
@@ -813,7 +814,7 @@ static TLS struct {
                                                   ? MBEDTLS_ENTROPY_BLOCK_SIZE
                                                   : dataLeftToConsume;
 
-            // Forces mbedTLS to fetch fresh entropy, then get some to feed libhydrogen.
+            // Force mbedTLS to fetch fresh entropy, then get some to feed libhydrogen.
             if (mbedtls_entropy_gather(&entropy) != 0 ||
                 mbedtls_entropy_func(&entropy, &hydro_random_context.state[pos], currentChunkSize) !=
                     0) {
@@ -873,7 +874,7 @@ static TLS struct {
         tmpreg = READ_BIT(RCC->AHB2ENR, RCC_AHB2ENR_RNGEN);
         UNUSED(tmpreg);
 
-        // RNG Peripheral enable
+        // Enable the RNG peripheral
         SET_BIT(RNG->CR, RNG_CR_RNGEN);
     #elif defined(STM32L4)
         RngHandle.Instance = RNG;
@@ -988,7 +989,7 @@ static TLS struct {
         // Enable RNG clock source
         RCC_AHBPeriphClockCmd(RCC_AHBPeriph_RNG, ENABLE);
 
-        // RNG Peripheral enable
+        // Enable the RNG peripheral
         RNG_Cmd(ENABLE);
 
         hydro_hash_init(&st, ctx, NULL);
@@ -1116,8 +1117,8 @@ hydro_random_uniform(const uint32_t upper_bound)
     do {
         r = hydro_random_u32();
     } while (r < min);
-    /* r is now clamped to a set whose size mod upper_bound == 0
-     * the worst case (2**31+1) requires 2 attempts on average */
+    /* r is now clamped to a set whose size modulo upper_bound is zero.
+     * The worst case (2**31+1) requires 2 attempts on average. */
 
     return r % upper_bound;
 }
@@ -2290,7 +2291,7 @@ hydro_x25519_ladder_part1(hydro_x25519_fe xs[5])
     hydro_x25519_add(x2, x3, z3); // x2 = C
     hydro_x25519_sub(z3, x3, z3); // z3 = D
     hydro_x25519_mul1(z3, t1); // z3 = DA
-    hydro_x25519_mul1(x2, z2); // x3 = BC
+    hydro_x25519_mul1(x2, z2); // x2 = BC
     hydro_x25519_add(x3, z3, x2); // x3 = DA+CB
     hydro_x25519_sub(z3, z3, x2); // z3 = DA-CB
     hydro_x25519_sqr1(t1); // t1 = AA
