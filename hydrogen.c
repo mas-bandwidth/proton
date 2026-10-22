@@ -1223,17 +1223,17 @@ hydro_bin2hex(char *hex, size_t hex_maxlen, const uint8_t *bin, size_t bin_len)
 {
     size_t       i = (size_t) 0U;
     unsigned int x;
-    int          b;
-    int          c;
+    unsigned int b;
+    unsigned int c;
 
     if (bin_len >= SIZE_MAX / 2 || hex_maxlen <= bin_len * 2U) {
         abort();
     }
     while (i < bin_len) {
-        c = bin[i] & 0xf;
-        b = bin[i] >> 4;
-        x = (unsigned char) (87U + c + (((c - 10U) >> 8) & ~38U)) << 8 |
-            (unsigned char) (87U + b + (((b - 10U) >> 8) & ~38U));
+        c = bin[i] & 0xfU;
+        b = (unsigned int) bin[i] >> 4;
+        x = (unsigned int) (unsigned char) (87U + c + (((c - 10U) >> 8) & ~38U)) << 8 |
+            (unsigned int) (unsigned char) (87U + b + (((b - 10U) >> 8) & ~38U));
         hex[i * 2U] = (char) x;
         x >>= 8;
         hex[i * 2U + 1U] = (char) x;
@@ -1261,9 +1261,9 @@ hydro_hex2bin(uint8_t *bin, size_t bin_maxlen, const char *hex, size_t hex_len, 
     while (hex_pos < hex_len) {
         c        = (unsigned char) hex[hex_pos];
         c_num    = c ^ 48U;
-        c_num0   = (c_num - 10U) >> 8;
-        c_alpha  = (c & ~32U) - 55U;
-        c_alpha0 = ((c_alpha - 10U) ^ (c_alpha - 16U)) >> 8;
+        c_num0   = (unsigned char) ((c_num - 10U) >> 8);
+        c_alpha  = (unsigned char) ((c & ~32U) - 55U);
+        c_alpha0 = (unsigned char) (((c_alpha - 10U) ^ (c_alpha - 16U)) >> 8);
         if ((c_num0 | c_alpha0) == 0U) {
             if (ignore != NULL && state == 0U && strchr(ignore, c) != NULL) {
                 hex_pos++;
@@ -1282,7 +1282,7 @@ hydro_hex2bin(uint8_t *bin, size_t bin_maxlen, const char *hex, size_t hex_len, 
         } else {
             bin[bin_pos++] = c_acc | c_val;
         }
-        state = ~state;
+        state = (unsigned char) ~state;
         hex_pos++;
     }
     if (state != 0U) {
@@ -1314,7 +1314,7 @@ hydro_equal(const void *b1_, const void *b2_, size_t len)
     uint8_t        d = (uint8_t) 0U;
 
     if (b1 == b2) {
-        d = ~d;
+        d = (uint8_t) ~d;
     }
     for (i = 0U; i < len; i++) {
         d |= b1[i] ^ b2[i];
@@ -1334,8 +1334,8 @@ hydro_compare(const uint8_t *b1_, const uint8_t *b2_, size_t len)
     i = len;
     while (i != 0U) {
         i--;
-        gt |= ((b2[i] - b1[i]) >> 8) & eq;
-        eq &= ((b2[i] ^ b1[i]) - 1) >> 8;
+        gt |= (uint8_t) (((b2[i] - b1[i]) >> 8) & eq);
+        eq &= (uint8_t) (((b2[i] ^ b1[i]) - 1) >> 8);
     }
     return (int) (gt + gt + eq) - 1;
 }
@@ -2120,7 +2120,7 @@ hydro_x25519_umaal(hydro_x25519_limb_t *carry, hydro_x25519_limb_t acc, hydro_x2
 {
     hydro_x25519_dlimb_t tmp = (hydro_x25519_dlimb_t) mand * mier + acc + *carry;
 
-    *carry = tmp >> hydro_x25519_WBITS;
+    *carry = (hydro_x25519_limb_t) (tmp >> hydro_x25519_WBITS);
     return (hydro_x25519_limb_t) tmp;
 }
 
@@ -2129,7 +2129,7 @@ hydro_x25519_adc(hydro_x25519_limb_t *carry, hydro_x25519_limb_t acc, hydro_x255
 {
     hydro_x25519_dlimb_t total = (hydro_x25519_dlimb_t) *carry + acc + mand;
 
-    *carry = total >> hydro_x25519_WBITS;
+    *carry = (hydro_x25519_limb_t) (total >> hydro_x25519_WBITS);
     return (hydro_x25519_limb_t) total;
 }
 
@@ -2138,7 +2138,7 @@ hydro_x25519_adc0(hydro_x25519_limb_t *carry, hydro_x25519_limb_t acc)
 {
     hydro_x25519_dlimb_t total = (hydro_x25519_dlimb_t) *carry + acc;
 
-    *carry = total >> hydro_x25519_WBITS;
+    *carry = (hydro_x25519_limb_t) (total >> hydro_x25519_WBITS);
     return (hydro_x25519_limb_t) total;
 }
 
@@ -2278,7 +2278,7 @@ hydro_x25519_canon(hydro_x25519_fe x)
         res |= x[i] = (hydro_x25519_limb_t) (carry += x[i]);
         carry >>= hydro_x25519_WBITS;
     }
-    return ((hydro_x25519_dlimb_t) res - 1) >> hydro_x25519_WBITS;
+    return (int) (((hydro_x25519_dlimb_t) res - 1) >> hydro_x25519_WBITS);
 }
 
 static void
@@ -2337,7 +2337,7 @@ hydro_x25519_core(hydro_x25519_fe xs[5], const uint8_t scalar[hydro_x25519_BYTES
 
         if (clamp) {
             if (i / 8 == 0) {
-                bytei &= ~7;
+                bytei &= (uint8_t) ~7U;
             } else if (i / 8 == hydro_x25519_BYTES - 1) {
                 bytei &= 0x7F;
                 bytei |= 0x40;
