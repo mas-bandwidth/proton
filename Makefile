@@ -17,6 +17,12 @@ ccflags-y += -Wall -Wextra -Wpedantic -Wshadow -Wconversion -Wsign-conversion \
 ifeq ($(PROTON_WARNINGS_AS_ERRORS),1)
 ccflags-y += -Werror
 endif
+# Kbuild also force-includes linux/compiler_types.h by absolute path (-include), which
+# no search directory can mark as a system header. It defines two GNU named variadic
+# macros (`args...`), which -Wpedantic reports at their definition in that header.
+# -Wno-variadic-macros is that one warning and nothing else: neither proton.c nor
+# hydrogen.c defines a variadic macro.
+ccflags-y += -Wno-variadic-macros
 ccflags-y += -isystem $(srctree)/arch/$(SRCARCH)/include \
 	-isystem $(objtree)/arch/$(SRCARCH)/include/generated \
 	-isystem $(srctree)/include \

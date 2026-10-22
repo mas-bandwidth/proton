@@ -103,7 +103,7 @@ static int __init proton_init( void )
     if ( IS_ERR( sha256_tfm ) )
     {
         pr_err( "can't create sha256 crypto hash algorithm\n" );
-        return PTR_ERR( sha256_tfm );
+        return (int) PTR_ERR( sha256_tfm );
     }
 
     int result = register_btf_kfunc_id_set( BPF_PROG_TYPE_XDP, &bpf_task_kfunc_set );
@@ -130,8 +130,8 @@ static void __exit proton_exit( void )
     pr_info( "proton kernel module shut down successfully\n" );
 }
 
-module_init( proton_init );
-module_exit( proton_exit );
+module_init( proton_init )
+module_exit( proton_exit )
 
 #include "hydrogen.c"
 

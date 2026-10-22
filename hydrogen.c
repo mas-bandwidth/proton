@@ -381,7 +381,7 @@ static void gimli_core_u8(uint8_t state_u8[gimli_BLOCKBYTES], uint8_t tag);
 static inline void
 gimli_pad_u8(uint8_t buf[gimli_BLOCKBYTES], size_t pos, uint8_t domain)
 {
-    buf[pos] ^= (domain << 1) | 1;
+    buf[pos] ^= (uint8_t) ((domain << 1) | 1);
     buf[gimli_RATE - 1] ^= 0x80;
 }
 
